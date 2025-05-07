@@ -1,6 +1,8 @@
 #include "xparameters.h"
 #include "xgpio.h"
 #include "sleep.h"   // usleep()
+#include "stdlib.h"
+#include "PmodJSTK2.h"
 
 // Pull in the device IDs auto-generated in xparameters.h
 #define SEG_DEVICE_ID   XPAR_AXI_GPIO_SEG_DEVICE_ID    // should be 2
@@ -10,9 +12,32 @@
 
 static XGpio gpioSeg, gpioApple;
 
+PmodJSTK2 joystick;
+
+void Initialize();
+void Run();
+
 int main(void)
 {
+	Initialize();
+	Run();
+}
+
+void Initialize() {
+	JSTK2_begin(
+	      &joystick,
+	      XPAR_PMODJSTK2_0_AXI_LITE_SPI_BASEADDR,
+	      XPAR_PMODJSTK2_0_AXI_LITE_GPIO_BASEADDR
+	   );
+
+	   // Set inversion register to invert only the Y axis
+	   JSTK2_setInversion(&joystick, 0, 1);
+}
+
+void Run() {
     int status;
+    JSTK2_Position position;
+    JSTK2_DataPacket rawdata;
 
     // 1) Initialize the two GPIO instances
     status = XGpio_Initialize(&gpioSeg,   SEG_DEVICE_ID);
@@ -26,23 +51,25 @@ int main(void)
     XGpio_SetDataDirection(&gpioApple, GPIO_CHAN, 0x0);
 
     // 3) Bouncing‐sprite demo
-    int x = 0, y = 0;
+    int x = 200, y = 200;
     int dx = 2, dy = 1;
 
+    int x1 = 100, y1 = 100;
+
+    int value = rand() % (30 - 5 + 1) + 5;
+
     while (1) {
+        // Get joystick x and y coordinate values
+        position = JSTK2_getPosition(&joystick);
+        // Get button states
+        rawdata = JSTK2_getDataPacket(&joystick);
+
         // pack Y in bits [19:10], X in bits [9:0]
-        u32 seg_val   = ((y & 0x3FF) << 10) | (x & 0x3FF);
-        u32 apple_val = (((y+64) & 0x3FF) << 10) | ((x+128) & 0x3FF);
+        u32 seg_val   = ((y-position.YData & 0x3FF) << 10) | (x+position.XData & 0x3FF);
+        u32 apple_val = (((y1+value) & 0x3FF) << 10) | ((x+value) & 0x3FF);
 
         XGpio_DiscreteWrite(&gpioSeg,   GPIO_CHAN, seg_val);
         XGpio_DiscreteWrite(&gpioApple, GPIO_CHAN, apple_val);
-
-        // bounce off the visible 0…(640−16), 0…(480−16) edges
-        x += dx;
-        if (x < 0 || x > (640-16)) dx = -dx;
-
-        y += dy;
-        if (y < 0 || y > (480-16)) dy = -dy;
 
         usleep(16000);  // ~60 Hz
     }

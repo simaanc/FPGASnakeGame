@@ -21,63 +21,60 @@
 
 
 module vga_sprite_top (
-  // clocks & resets
-  input  wire        pix_clk,    // 25 MHz from clk_wiz_0.clk_out2
-  input  wire        pix_rst,    // 25 MHz-domain reset (proc_sys_reset_25.peripheral_reset)
-  // VGA core outputs
+  input  wire        pix_clk,
+  input  wire        pix_rst,
+
+  // coords from AXI-GPIO
+  input  wire [19:0] seg_data,
+  input  wire [19:0] apple_data,
+
+  // VGA pins
   output wire        VGA_Hsync,
   output wire        VGA_Vsync,
   output wire [3:0]  VGA_Red,
   output wire [3:0]  VGA_Green,
-  output wire [3:0]  VGA_Blue,
-  // sprite coords from AXI-GPIO
-  input  wire [19:0] seg_data,    // gpio_io_o of axi_gpio_seg
-  input  wire [19:0] apple_data   // gpio_io_o of axi_gpio_apple
+  output wire [3:0]  VGA_Blue
 );
 
-  // 1) instantiate the VGA timing generator
+  // 1) VGA timing
   wire        active;
   wire [9:0]  xpos;
   wire [8:0]  ypos;
-
   vga640x480 u_vga (
     .i_clk      (pix_clk),
     .i_pix_stb  (1'b1),
     .i_rst      (pix_rst),
     .o_hs       (VGA_Hsync),
     .o_vs       (VGA_Vsync),
-    .o_blanking (), 
     .o_active   (active),
-    .o_screenend(), .o_animate(),
     .o_x        (xpos),
-    .o_y        (ypos)
+    .o_y        (ypos),
+    .o_blanking (), .o_screenend(), .o_animate()
   );
 
-  // 2) unpack your two 20-bit registers
-  wire [9:0] seg_x   = seg_data[ 9: 0];
-  wire [9:0] seg_y   = seg_data[19:10];
-  wire [9:0] app_x   = apple_data[ 9: 0];
-  wire [9:0] app_y   = apple_data[19:10];
+  // 2) Unpack XY
+  wire [9:0] seg_x = seg_data[9:0],   seg_y = seg_data[19:10];
+  wire [9:0] app_x = apple_data[9:0], app_y = apple_data[19:10];
 
-  // sprite size (in pixels)
-  localparam S = 16;
+  // 3) Two sprite engines w/ different BASE_ADDR
+  wire seg_pix, app_pix;
+  vga_sprite_rom #(.BASE_ADDR(0))  u_seg_rom (
+    .pix_clk(pix_clk), .pix_rst(pix_rst),
+    .active(active), .xpos(xpos), .ypos(ypos),
+    .spr_x(seg_x), .spr_y(seg_y),
+    .pixel_on(seg_pix)
+  );
+  vga_sprite_rom #(.BASE_ADDR(16)) u_app_rom (
+    .pix_clk(pix_clk), .pix_rst(pix_rst),
+    .active(active), .xpos(xpos), .ypos(ypos),
+    .spr_x(app_x), .spr_y(app_y),
+    .pixel_on(app_pix)
+  );
 
-  // 3) hit tests
-  wire hit_seg   = active
-    && xpos>=seg_x && xpos< seg_x + S
-    && ypos>=seg_y && ypos< seg_y + S;
-
-  wire hit_apple = active
-    && xpos>=app_x && xpos< app_x + S
-    && ypos>=app_y && ypos< app_y + S;
-
-  // 4) simple 1-bit color ? 4-bit DAC
-  wire [3:0] red   = hit_apple ? 4'hF : 4'h0;
-  wire [3:0] green = hit_seg   ? 4'hF : 4'h0;
-  wire [3:0] blue  = 4'h0;
-
-  assign VGA_Red   = active ? red   : 4'h0;
-  assign VGA_Green = active ? green : 4'h0;
-  assign VGA_Blue  = active ? blue  : 4'h0;
+  // 4) Color mux
+  assign VGA_Red   = active ? (app_pix ? 4'hF : 4'h0) : 4'h0;
+  assign VGA_Green = active ? (seg_pix ? 4'hF : 4'h0) : 4'h0;
+  assign VGA_Blue  = 4'h0;
 
 endmodule
+

@@ -1,21 +1,14 @@
 # ----------------------------------------------------------------------------
-# Xilinx Vivado project artifacts
+# Vivado generated project files and directories
 # ----------------------------------------------------------------------------
-# Project files
-*.xpr
-*.xpr.lock
-*.xise
+.ip_user_files/
+.cache/
+.hw/
+.runs/
+.sim/
+sim_*
 
-# Build outputs
-*.bit
-*.bin
-*.mcs
-*.elf
-*.hdf
-*.xsa
-*.hwh
-
-# Logs, reports, backups
+# Vivado logs, reports, backups
 *.jou
 *.log
 *.str
@@ -24,15 +17,25 @@
 *_pb.*
 *.backup
 
-# Vivado directories
-.ip_user_files/
-.cache/
-.hw/
-.runs/
-.sim/
+# Vivado bitstream / exports
+*.bit
+*.bin
+*.mcs
+*.elf
+*.hdf
+*.xsa
+*.hwh
 
-# Simulation directories
-sim_*
+# ----------------------------------------------------------------------------
+# Vivado auto-generated HDL wrappers & VHDL files
+# ----------------------------------------------------------------------------
+# drop ALL VHDL since project is Verilog-only
+*.vhd
+*.vhdl
+
+# drop Vivado wrapper files
+*_wrapper.vhd
+*_wrapper.vhdl
 
 # ----------------------------------------------------------------------------
 # MicroBlaze / Vitis / SDK build artifacts
@@ -49,11 +52,10 @@ sim_*
 *.d
 *.lst
 *.mem
-*.elf
 *.elf.*
 *.bin
 
-# Auto‐generated project specs
+# Auto-generated project specs
 project-spec.xml
 
 # ----------------------------------------------------------------------------

@@ -1,0 +1,74 @@
+# ----------------------------------------------------------------------------
+# Xilinx Vivado project artifacts
+# ----------------------------------------------------------------------------
+# Project files
+*.xpr
+*.xpr.lock
+*.xise
+
+# Build outputs
+*.bit
+*.bin
+*.mcs
+*.elf
+*.hdf
+*.xsa
+*.hwh
+
+# Logs, reports, backups
+*.jou
+*.log
+*.str
+*.wdb
+*.xrpt
+*_pb.*
+*.backup
+
+# Vivado directories
+.ip_user_files/
+.cache/
+.hw/
+.runs/
+.sim/
+
+# Simulation directories
+sim_*
+
+# ----------------------------------------------------------------------------
+# MicroBlaze / Vitis / SDK build artifacts
+# ----------------------------------------------------------------------------
+# BSP / hardware platform
+*_bsp/_sds/
+*_bsp/ps7_cortexa9_0/
+*_bsp/*.mss
+*_bsp/*.hw_platform
+*_bsp/*.xsa
+
+# Compiler/linker outputs
+*.o
+*.d
+*.lst
+*.mem
+*.elf
+*.elf.*
+*.bin
+
+# Auto‐generated project specs
+project-spec.xml
+
+# ----------------------------------------------------------------------------
+# IDE / Editor
+# ----------------------------------------------------------------------------
+.vscode/
+.idea/
+.project
+.cproject
+.settings/
+
+# ----------------------------------------------------------------------------
+# OS / Misc
+# ----------------------------------------------------------------------------
+*~
+*.tmp
+.DS_Store
+Thumbs.db

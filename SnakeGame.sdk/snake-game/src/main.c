@@ -113,3 +113,20 @@ int main(void) {
     Run();
     return 0;
 }
+
+        // // Display apple
+        // u32 apple_val = (((apple_y * TILE_SIZE) & 0x3FF) << 10) | ((apple_x * TILE_SIZE) & 0x3FF);
+        // XGpio_DiscreteWrite(&gpioApple, GPIO_CHAN, apple_val);
+        
+        // // Fast multiplexing - display each segment briefly
+        // for (int i = 0; i < snake_len; i++) {
+        //     u32 seg_val = (((snake_y[i] * TILE_SIZE) & 0x3FF) << 10) | ((snake_x[i] * TILE_SIZE) & 0x3FF);
+        //     XGpio_DiscreteWrite(&gpioSeg, GPIO_CHAN, seg_val);
+        //     usleep(SEGMENT_DISPLAY_US);
+        // }
+        
+        // // Remaining time for frame rate control
+        // int remaining_time = SNAKE_SPEED_US - (snake_len * SEGMENT_DISPLAY_US);
+        // if (remaining_time > 0) {
+        //     usleep(remaining_time);
+        // }
